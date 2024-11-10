@@ -1,0 +1,109 @@
+---
+title: "Prioritizing potential aquaculture"
+author: "Marina Kochuten"
+date: last-modified
+execute: 
+  warning: false
+  message: false
+format: html
+editor_options: 
+  chunk_output_type: console
+---
+
+## Project description
+
+For this project, I am determining which Exclusive Economic Zones (EEZ) on the West Coast of the US are best suited to developing marine aquaculture for several species of oysters and dungeness crab. Marine aquaculture has the potential to play an important role in the global food supply as a more sustainable protein option than land-based meat production (Hall et al. 2011). Gentry et al. mapped the potential for marine aquaculture globally based on multiple constraints, including ship traffic, dissolved oxygen, and bottom depth. They found that global seafood demand could be met using less than 0.015% of the global ocean area (Gentry et al. 2017). Suitable locations are determined based on range of suitable sea surface temperature (SST) and depth values for the species.
+
+## Data details
+
+#### Suitable Growing Conditions
+
+**Oysters**
+- sea surface temperature: 11-30°C
+- depth: 0-70 meters below sea level
+
+**Dungeness Crab**
+- sea surface temperature: 3-19°C
+- depth: 0-360 meters below sea level
+
+#### Sea Surface Temperature
+
+I use average annual sea surface temperature (SST) from the years 2008 to 2012 to characterize the average sea surface temperature within the region. The data we are working with was originally generated from NOAA’s 5km Daily Global Satellite Sea Surface Temperature Anomaly v3.1.
+
+#### Bathymetry
+
+To characterize the depth of the ocean, I use the General Bathymetric Chart of the Oceans (GEBCO).
+
+#### Exclusive Economic Zones
+
+I designate maritime boundaries using Exclusive Economic Zones off of the west coast of US from Marineregions.org
+
+## Setup
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+# Load libraries ----
+library(sf)
+library(terra)
+library(tidyverse)
+library(tmap)
+library(here)
+```
+
+Load the data:
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+# Read in data ----
+
+# Sea surface temp
+sst_2008 <- rast(here("data", "average_annual_sst_2008.tif"))
+sst_2009 <- rast(here("data", "average_annual_sst_2009.tif"))
+sst_2010 <- rast(here("data", "average_annual_sst_2010.tif"))
+sst_2011 <- rast(here("data", "average_annual_sst_2011.tif"))
+sst_2012 <- rast(here("data", "average_annual_sst_2012.tif"))
+
+# Bathymetry
+depth <- rast(here("data", "depth.tif"))
+
+# Exclusive economic zones for maritime boundaries
+wc_regions <- read_sf(here("data", "wc_regions_clean.shp"))
+```
+
+Prepare data for processing:
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+# Combine SST rasters into a stack ----
+
+# Match CRSs ----
+
+```
+
+
+
+## Citations
+
+#### Data
+
+**Suitable Growing Conditions**
+Palomares, M.L.D. and D. Pauly. Editors. 2024. SeaLifeBase. World Wide Web electronic publication. www.sealifebase.org, version (08/2024). Accessed 2024-11-09
+
+**Sea Surface Temperature**
+NOAA Coral Reef Watch. 2018, updated daily. NOAA Coral Reef Watch Version 3.1 5km Daily Global Satellite Sea Surface Temperature Anomaly Product, 2008-2012. College Park, Maryland, USA: NOAA Coral Reef Watch. Data set accessed 2024-11-09 at https://coralreefwatch.noaa.gov/product/5km/index_5km_ssta.php.
+
+**Bathymetry**
+GEBCO Compilation Group (2024) GEBCO 2024 Grid (doi:10.5285/1c44ce99-0a0d-5f4f-e063-7086abc0ea0f). Data set accessed 2024-11-09 at https://www.gebco.net/data_and_products/gridded_bathymetry_data/#area
+
+**Exclusive Economic Zones**
+Marine Regions (2024) Flanders Marine Institute. Data set accessed 2024-11-09 at https://www.marineregions.org/eez.php. 
+
+#### Literature
+
+Hall, S. J., Delaporte, A., Phillips, M. J., Beveridge, M. & O’Keefe, M. Blue Frontiers: Managing the Environmental Costs of Aquaculture (The WorldFish Center, Penang, Malaysia, 2011).
+
+Gentry, R. R., Froehlich, H. E., Grimm, D., Kareiva, P., Parke, M., Rust, M., Gaines, S. D., & Halpern, B. S. Mapping the global potential for marine aquaculture. Nature Ecology & Evolution, 1, 1317-1324 (2017).
