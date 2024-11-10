@@ -79,8 +79,29 @@ Prepare data for processing:
 #| code-summary: "Show the code"
 
 # Combine SST rasters into a stack ----
+sst_all <- c(sst_2008,
+             sst_2009,
+             sst_2010,
+             sst_2011,
+             sst_2012)
 
 # Match CRSs ----
+
+# Depth
+if(st_crs(depth) == st_crs(wc_regions)) {
+    print("CRSs match")
+} else {
+    warning(paste("CRSs do not match - transforming now"))
+    depth <- st_transform(depth, crs = st_crs(wc_regions))
+}
+
+# SST
+if(st_crs(sst_all) == st_crs(wc_regions)) {
+    print("CRSs match")
+} else {
+    warning(paste("CRSs do not match - transforming now"))
+    sst_all <- project(sst_all, crs = st_crs(wc_regions))   # error: [write] unknown option(s): crs
+}
 
 ```
 
