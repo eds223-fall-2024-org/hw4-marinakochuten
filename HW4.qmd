@@ -91,20 +91,49 @@ sst_all <- c(sst_2008,
 if(st_crs(depth) == st_crs(wc_regions)) {
     print("CRSs match")
 } else {
-    warning(paste("CRSs do not match - transforming now"))
-    depth <- st_transform(depth, crs = st_crs(wc_regions))
+    warning("CRSs do not match - transforming now")
+    depth <- project(depth, crs = st_crs(wc_regions))
 }
 
 # SST
 if(st_crs(sst_all) == st_crs(wc_regions)) {
     print("CRSs match")
 } else {
-    warning(paste("CRSs do not match - transforming now"))
+    warning("CRSs do not match - transforming now")
     sst_all <- project(sst_all, crs = st_crs(wc_regions))   # error: [write] unknown option(s): crs
 }
 
+# Trying with unstacked raster to see if it fixes error
+if(st_crs(sst_2008) == st_crs(wc_regions)) {
+    print("CRSs match")
+} else {
+    warning("CRSs do not match - transforming now")
+    sst_2008 <- project(sst_2008, crs = st_crs(wc_regions))   # error: [write] unknown option(s): crs
+}
+
+crs(sst_all)
+st_crs(sst_all)
 ```
 
+Process data
+```{r}
+# Create raster with mean SST from 2008-2012
+sst_mean <- mean(sst_all, na.rm = TRUE)  # Remove NA values
+
+# Convert mean SST from Kelvin to Celsius
+sst_mean <- sst_mean - 273.15
+
+# Crop depth to match the extent of mean SST
+ext(depth) <- ext(sst_mean)
+
+# Resample the depth data to match the resolution of the SST data using the nearest neighbor approach
+depth <- resample(depth, sst_mean, method = "near")
+
+# Stack depth and mean SST to check that resolution, extent, and CRS match
+sst_depth <- c(sst_mean,
+               depth)    # error, CRS do not match
+
+```
 
 
 ## Citations
