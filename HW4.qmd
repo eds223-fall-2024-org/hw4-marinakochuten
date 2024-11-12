@@ -131,13 +131,6 @@ sst_depth <- c(sst_mean,
 Find suitable locations for marine aquaculture
 ```{r}
 # Reclassify SST and depth into locations that are suitable for oysters ----
-# **Oysters**
-# - sea surface temperature: 11-30°C
-# - depth: 0-70 meters below sea level
-# 
-# **Dungeness Crab**
-# - sea surface temperature: 3-19°C
-# - depth: 0-360 meters below sea level
 
 # Create reclassification matrix - sst oysters
 rcl_sst_oysters <- matrix(c(-Inf, 11, 0,    # unsuitable
@@ -145,10 +138,21 @@ rcl_sst_oysters <- matrix(c(-Inf, 11, 0,    # unsuitable
                             30, Inf, 0),    # unsuitable
                             ncol = 3, byrow = TRUE)
 
+# Reclassify SST
+sst_oysters <- classify(sst_mean, rcl = rcl_sst_oysters)
+plot(sst_oysters)
+
 # Create reclassification matrix - depth oysters
-rcl_depth_oysters <- matrix(c(0, 70, 1,    # suitable
-                              70, Inf, 0),   # unsuitable
+rcl_depth_oysters <- matrix(c(-Inf, -70, 0,    # unsuitable
+                              -70, 0, 1,      # suitable
+                              0, Inf, 0),   # unsuitable
                               ncol = 3, byrow = TRUE)
+
+# Reclassify depth
+depth_oysters <- classify(depth, rcl = rcl_depth_oysters)
+plot(depth_oysters)
+
+# Find locations that satisfy both SST and depth conditions for oysters ----
 
 
 # Reclassify SST and depth into locations that are suitable for dungeness crabs ----
@@ -159,10 +163,22 @@ rcl_sst_crabs <- matrix(c(-Inf, 3, 0,      # unsuitable
                             19, Inf, 0),   # unsuitable
                             ncol = 3, byrow = TRUE)
 
+# Reclassify SST
+sst_crabs <- classify(sst_mean, rcl = rcl_sst_crabs)
+plot(sst_crabs)
+
 # Create reclassification matrix - depth crabs
-rcl_depth_crabs <- matrix(c(0, 360, 1,      # suitable
-                            360, Inf, 0),   # unsuitable
+rcl_depth_crabs <- matrix(c(-Inf, -360, 0,   # unsuitable
+                            -360, 0, 1,      # suitable
+                            0, Inf, 0),      # unsuitable
                             ncol = 3, byrow = TRUE)
+
+# Reclassify depth
+depth_crabs <- classify(depth, rcl = rcl_depth_crabs)
+plot(depth_crabs)
+
+# Find locations that satisfy both SST and depth conditions for crabs ----
+
 
 ```
 
