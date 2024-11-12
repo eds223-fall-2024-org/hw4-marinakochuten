@@ -50,6 +50,7 @@ library(terra)
 library(tidyverse)
 library(tmap)
 library(here)
+library(testthat)
 ```
 
 Load the data:
@@ -87,36 +88,28 @@ sst_all <- c(sst_2008,
 
 # Match CRSs ----
 
+# Regions
+wc_regions <- st_transform(wc_regions, crs = "EPSG:4326")
+
 # Depth
-if(st_crs(depth) == st_crs(wc_regions)) {
-    print("CRSs match")
-} else {
-    warning("CRSs do not match - transforming now")
-    depth <- project(depth, crs = st_crs(wc_regions))
-}
+depth <- depth |>
+  project("EPSG:4326")
 
 # SST
-if(st_crs(sst_all) == st_crs(wc_regions)) {
-    print("CRSs match")
-} else {
-    warning("CRSs do not match - transforming now")
-    sst_all <- project(sst_all, crs = st_crs(wc_regions))   # error: [write] unknown option(s): crs
-}
+sst_all <- sst_all|>
+  project("EPSG:4326")
 
-# Trying with unstacked raster to see if it fixes error
-if(st_crs(sst_2008) == st_crs(wc_regions)) {
-    print("CRSs match")
-} else {
-    warning("CRSs do not match - transforming now")
-    sst_2008 <- project(sst_2008, crs = st_crs(wc_regions))   # error: [write] unknown option(s): crs
-}
-
-crs(sst_all)
-st_crs(sst_all)
+# Check that CRS match
+test_that("All CRSs match", 
+          {expect_true(st_crs(wc_regions) == st_crs(depth) & st_crs(wc_regions) == st_crs(sst_all))
+})
 ```
 
 Process data
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 # Create raster with mean SST from 2008-2012
 sst_mean <- mean(sst_all, na.rm = TRUE)  # Remove NA values
 
@@ -131,9 +124,49 @@ depth <- resample(depth, sst_mean, method = "near")
 
 # Stack depth and mean SST to check that resolution, extent, and CRS match
 sst_depth <- c(sst_mean,
-               depth)    # error, CRS do not match
+               depth)
 
 ```
+
+Find suitable locations for marine aquaculture
+```{r}
+# Reclassify SST and depth into locations that are suitable for oysters ----
+# **Oysters**
+# - sea surface temperature: 11-30°C
+# - depth: 0-70 meters below sea level
+# 
+# **Dungeness Crab**
+# - sea surface temperature: 3-19°C
+# - depth: 0-360 meters below sea level
+
+# Create reclassification matrix - sst oysters
+rcl_sst_oysters <- matrix(c(-Inf, 11, 0,    # unsuitable
+                            11, 30, 1,      # suitable
+                            30, Inf, 0),    # unsuitable
+                            ncol = 3, byrow = TRUE)
+
+# Create reclassification matrix - depth oysters
+rcl_depth_oysters <- matrix(c(0, 70, 1,    # suitable
+                              70, Inf, 0),   # unsuitable
+                              ncol = 3, byrow = TRUE)
+
+
+# Reclassify SST and depth into locations that are suitable for dungeness crabs ----
+
+# Create reclassification matrix - sst crabs
+rcl_sst_crabs <- matrix(c(-Inf, 3, 0,      # unsuitable
+                            3, 19, 1,      # suitable
+                            19, Inf, 0),   # unsuitable
+                            ncol = 3, byrow = TRUE)
+
+# Create reclassification matrix - depth crabs
+rcl_depth_crabs <- matrix(c(0, 360, 1,      # suitable
+                            360, Inf, 0),   # unsuitable
+                            ncol = 3, byrow = TRUE)
+
+```
+
+
 
 
 ## Citations
