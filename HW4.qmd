@@ -191,16 +191,62 @@ plot(depth_crabs)
 
 Determine the most suitable EEZ
 ```{r}
-# Rasterize regions (EEZ) data 
-eez_rast <- rasterize(wc_regions, depth)
-plot(eez_rast)
+#| code-fold: true
+#| code-summary: "Show the code"
 
-# Create a mask for areas that are suitable for oysters
+# We want to determine the total suitable area within each EEZ in order to rank zones by priority. To do so, we need to find the total area of suitable locations within each EEZ.
+
+# Rasterize regions (EEZ) data 
+# eez_rast <- rasterize(wc_regions, depth, field = "rgn_id") # Keep region IDs 
+# plot(eez_rast)
+
+# Create a mask for areas that are suitable for oysters ----
 oysters_suitable[oysters_suitable == 0] <- NA
+plot(oysters_suitable)
+
+# Convert to polygons and vectorize mask
+oysters_suitable <- as.polygons(oysters_suitable) |>
+  st_as_sf()
+plot(oysters_suitable)
 
 # Select suitable cells within West Coast EEZs
-suitable_eez <- eez_rast[oysters_suitable, ]
-plot(suitable_eez) # OOPS!!! Fix this
+# suitable_eez <- mask(eez_rast, oysters_suitable) # I dont think this was the right way for me to go
+# plot(suitable_eez)
+
+# Try using st_filter
+# eez_filter <- wc_regions |>
+#   st_filter(y = oysters_suitable, .predicate = st_intersects)
+# plot(eez_filter)
+
+# try using st_join
+# eez_filter <- st_join(oysters_suitable, wc_regions, left = FALSE)
+# plot(eez_filter)
+
+# Select suitable areas within West Coast EEZs ----
+eez_intersection <- st_intersection(oysters_suitable, wc_regions)
+plot(eez_intersection)
+
+# Need to project to a CRS that uses meters to calculate distance
+# EPSG:9311 NAD27 / US National Atlas Equal Area,  United States (USA) - onshore and offshore.
+eez_intersection <- st_transform(eez_intersection, crs = "EPSG:9311")
+
+# Calculate area within each region ----
+eez_area <- eez_intersection |>
+  mutate(suitable_area_m2 = as.numeric(st_area(geometry))) |>   # st_area leaves units attached, as.numeric removes units
+  mutate(suitable_area_km2 = (suitable_area_m2/1000000))
+
+# Visual check
+tm_shape(wc_regions) +
+  tm_polygons(col = "rgn_id",
+              palette = "Greys") +
+  tm_shape(st_transform(eez_area, crs = "EPSG:4326")) +
+  tm_polygons(col = "rgn_id")
+
+# Rank zones by priority (high priority = highest suitable area) 
+
+
+
+# I think this looks good! Check with Ruth or Ale next week to make sure that using this method is actually giving what I want it to
 ```
 
 
