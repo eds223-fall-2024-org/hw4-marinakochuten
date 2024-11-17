@@ -130,6 +130,11 @@ sst_depth <- c(sst_mean,
 
 Find suitable locations for marine aquaculture
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| output: false
+#| collapse: true
+
 # Reclassify SST and depth into locations that are suitable for oysters ----
 
 # Create reclassification matrix - sst oysters
@@ -143,9 +148,9 @@ sst_oysters <- classify(sst_mean, rcl = rcl_sst_oysters)
 plot(sst_oysters)
 
 # Create reclassification matrix - depth oysters
-rcl_depth_oysters <- matrix(c(-Inf, -70, 0,    # unsuitable
+rcl_depth_oysters <- matrix(c(-Inf, -70, 0,   # unsuitable
                               -70, 0, 1,      # suitable
-                              0, Inf, 0),   # unsuitable
+                              0, Inf, 0),     # unsuitable
                               ncol = 3, byrow = TRUE)
 
 # Reclassify depth
@@ -153,8 +158,10 @@ depth_oysters <- classify(depth, rcl = rcl_depth_oysters)
 plot(depth_oysters)
 
 # Find locations that satisfy both SST and depth conditions for oysters ----
+oysters_suitable <- lapp(c(sst_oysters, depth_oysters), fun = function(sst, depth) sst * depth) # multiplication will only place 1 in areas that have 1 for both sst and depth
+plot(oysters_suitable)
 
-
+# HOLD OFF HERE - remember we are making a function to pass a species to
 # Reclassify SST and depth into locations that are suitable for dungeness crabs ----
 
 # Create reclassification matrix - sst crabs
@@ -182,6 +189,19 @@ plot(depth_crabs)
 
 ```
 
+Determine the most suitable EEZ
+```{r}
+# Rasterize regions (EEZ) data 
+eez_rast <- rasterize(wc_regions, depth)
+plot(eez_rast)
+
+# Create a mask for areas that are suitable for oysters
+oysters_suitable[oysters_suitable == 0] <- NA
+
+# Select suitable cells within West Coast EEZs
+suitable_eez <- eez_rast[oysters_suitable, ]
+plot(suitable_eez) # OOPS!!! Fix this
+```
 
 
 
