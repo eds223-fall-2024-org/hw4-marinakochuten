@@ -51,6 +51,7 @@ library(tidyverse)
 library(tmap)
 library(here)
 library(testthat)
+library(kableExtra)
 ```
 
 Load the data:
@@ -110,16 +111,16 @@ Process data
 #| code-fold: true
 #| code-summary: "Show the code"
 
-# Create raster with mean SST from 2008-2012
+# Create raster with mean SST from 2008-2012 ----
 sst_mean <- mean(sst_all, na.rm = TRUE)  # Remove NA values
 
-# Convert mean SST from Kelvin to Celsius
+# Convert mean SST from Kelvin to Celsius ----
 sst_mean <- sst_mean - 273.15
 
-# Crop depth to match the extent of mean SST
+# Crop depth to match the extent of mean SST ----
 ext(depth) <- ext(sst_mean)
 
-# Resample the depth data to match the resolution of the SST data using the nearest neighbor approach
+# Resample the depth data to match the resolution of the SST data using the nearest neighbor approach ----
 depth <- resample(depth, sst_mean, method = "near")
 
 # Stack depth and mean SST to check that resolution, extent, and CRS match
@@ -159,93 +160,34 @@ plot(depth_oysters)
 
 # Find locations that satisfy both SST and depth conditions for oysters ----
 oysters_suitable <- lapp(c(sst_oysters, depth_oysters), fun = function(sst, depth) sst * depth) # multiplication will only place 1 in areas that have 1 for both sst and depth
+
+# Set unsuitable areas as NA
+oysters_suitable[oysters_suitable == 0] <- NA
 plot(oysters_suitable)
-
-# HOLD OFF HERE - remember we are making a function to pass a species to
-# Reclassify SST and depth into locations that are suitable for dungeness crabs ----
-
-# Create reclassification matrix - sst crabs
-rcl_sst_crabs <- matrix(c(-Inf, 3, 0,      # unsuitable
-                            3, 19, 1,      # suitable
-                            19, Inf, 0),   # unsuitable
-                            ncol = 3, byrow = TRUE)
-
-# Reclassify SST
-sst_crabs <- classify(sst_mean, rcl = rcl_sst_crabs)
-plot(sst_crabs)
-
-# Create reclassification matrix - depth crabs
-rcl_depth_crabs <- matrix(c(-Inf, -360, 0,   # unsuitable
-                            -360, 0, 1,      # suitable
-                            0, Inf, 0),      # unsuitable
-                            ncol = 3, byrow = TRUE)
-
-# Reclassify depth
-depth_crabs <- classify(depth, rcl = rcl_depth_crabs)
-plot(depth_crabs)
-
-# Find locations that satisfy both SST and depth conditions for crabs ----
-
-
 ```
 
 Determine the most suitable EEZ
 ```{r}
-#| code-fold: true
-#| code-summary: "Show the code"
+# Mask suitable oysters with wc_regions to crop suitable cells to within EEZs ----
+oysters_masked <- mask(oysters_suitable, wc_regions)
+plot(oysters_masked)
 
-# Rasterize regions (EEZ) data 
-# eez_rast <- rasterize(wc_regions, depth, field = "rgn_id") # Keep region IDs 
-# plot(eez_rast)
+# Rasterize wc_regions for zonal operations ----
+eez_rast <- rasterize(wc_regions, oysters_masked, field = "rgn_id")
+plot(eez_rast)
 
-# Create a mask for areas that are suitable for oysters ----
-oysters_suitable[oysters_suitable == 0] <- NA
-plot(oysters_suitable)
+# Find area of each grid cell ----
+cell_size <- cellSize(oysters_masked, unit = "km") # This is not giving an output I would have expected
+plot(cell_size)
 
-# Convert to polygons and vectorize mask
-oysters_suitable <- as.polygons(oysters_suitable) |>
-  st_as_sf()
-plot(oysters_suitable)
+# Find total number of cells within each EEZ ----
+eez_oyster_area <- zonal(cell_size * oysters_masked, eez_rast, fun = "sum", na.rm = TRUE) |>
+  arrange(area)
 
-# Select suitable cells within West Coast EEZs
-# suitable_eez <- mask(eez_rast, oysters_suitable) # I dont think this was the right way for me to go
-# plot(suitable_eez)
-
-# Try using st_filter
-# eez_filter <- wc_regions |>
-#   st_filter(y = oysters_suitable, .predicate = st_intersects)
-# plot(eez_filter)
-
-# try using st_join
-# eez_filter <- st_join(oysters_suitable, wc_regions, left = FALSE)
-# plot(eez_filter)
-
-# Select suitable areas within West Coast EEZs ----
-eez_intersection <- st_intersection(oysters_suitable, wc_regions)
-plot(eez_intersection)
-
-# Need to project to a CRS that uses meters to calculate distance
-# EPSG:9311 NAD27 / US National Atlas Equal Area,  United States (USA) - onshore and offshore.
-eez_intersection <- st_transform(eez_intersection, crs = "EPSG:9311")
-
-# Calculate area within each region ----
-eez_area <- eez_intersection |>
-  mutate(suitable_area_m2 = as.numeric(st_area(geometry))) |>   # st_area leaves units attached, as.numeric removes units
-  mutate(suitable_area_km2 = (suitable_area_m2/1000000))
-
-# Visual check
-tm_shape(wc_regions) +
-  tm_polygons(col = "rgn_id",
-              palette = "Greys") +
-  tm_shape(st_transform(eez_area, crs = "EPSG:4326")) +
-  tm_polygons(col = "rgn_id")
-
-# Rank zones by priority (high priority = highest suitable area) 
-
-
-
-# I think this looks good! Check with Ruth or Ale next week to make sure that using this method is actually giving what I want it to
+# Make it look preety with spData us states
 ```
+
+
 
 
 
