@@ -194,8 +194,6 @@ Determine the most suitable EEZ
 #| code-fold: true
 #| code-summary: "Show the code"
 
-# We want to determine the total suitable area within each EEZ in order to rank zones by priority. To do so, we need to find the total area of suitable locations within each EEZ.
-
 # Rasterize regions (EEZ) data 
 # eez_rast <- rasterize(wc_regions, depth, field = "rgn_id") # Keep region IDs 
 # plot(eez_rast)
