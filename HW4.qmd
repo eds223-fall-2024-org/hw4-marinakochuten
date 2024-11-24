@@ -225,6 +225,96 @@ tm_shape(us_states, bbox = wc_regions) +   # basemap
   tm_scale_bar(position = (c("left", "bottom")))
 ```
 
+Build function
+```{r}
+
+suitable_eez_func <- function(species, min_sst, max_sst, min_depth, max_depth){
+ 
+  # Reclassify SST and depth into locations that are suitable for species ----
+  
+  # Create sst reclassification matrix
+  rcl_sst <- matrix(c(-Inf, min_sst, 0,         # unsuitable
+                      min_sst, max_sst, 1,      # suitable
+                      max_sst, Inf, 0),         # unsuitable
+                    ncol = 3, byrow = TRUE)
+  
+  # Reclassify SST
+  sst_reclass <- classify(sst_mean, rcl = rcl_sst)
+  
+  # Create depth reclassification matrix
+  rcl_depth <- matrix(c(-Inf, -max_depth, 0,         # unsuitable
+                        -max_depth, min_depth, 1,    # suitable
+                        0, Inf, 0),                  # unsuitable
+                      ncol = 3, byrow = TRUE)
+  
+  # Reclassify depth
+  depth_reclass <- classify(depth, rcl = rcl_depth)
+  
+  # Find locations that satisfy both SST and depth conditions for species ----
+  suitable <- lapp(c(sst_reclass, depth_reclass), fun = function(sst, depth) sst * depth) # multiplication will only place 1 in areas that have 1 for both sst and depth
+  
+  # Set unsuitable areas as NA
+  suitable[suitable == 0] <- NA
+  
+  # Mask suitable with wc_regions to crop suitable cells to within EEZs ----
+  masked <- mask(suitable, wc_regions)
+  
+  # Rasterize wc_regions for zonal operations ----
+  eez_rast <- rasterize(wc_regions, masked, field = "rgn_id")
+  
+  # Find area of each grid cell ----
+  cell_size <- cellSize(masked, unit = "km")
+  
+  # Find total number of cells within each EEZ ----
+  eez_area <- zonal(cell_size * masked, eez_rast, fun = "sum", na.rm = TRUE) |>
+    rename("suitable_area_km2" = "area")
+  
+  # Join eez_area to wc_regions vector by rgn_id and tidy
+  eez_area_vect <- left_join(wc_regions, eez_area, by = 'rgn_id')  |>
+    select(c("rgn", "rgn_id", "area_km2", "suitable_area_km2")) |>
+    rename("total_area_km2" = "area_km2") |>
+    mutate(rank = paste0(order(order(suitable_area_km2, decreasing = TRUE)), ": ", rgn)) |>   # Rank each zone 1-5 based on suitable area
+    arrange(rank) |>
+    mutate(suitable_area_label = paste("Suitable area: \n", round(suitable_area_km2), "km2"))
+  
+  # Create map ----
+  tm_shape(us_states, bbox = wc_regions) +   # basemap 
+    tm_polygons(alpha = 0.5) +
+    tm_shape(eez_area_vect) +   # Ranked EEZs
+    tm_polygons(col = "rank",
+                palette = "-Blues",
+                title = "EEZ Priority Rank \n 1 (highest) - 5 (lowest)") +
+    tm_text("rgn", fontface = "bold", ymod = 0.5) +   # EEZ region annotation                               
+    tm_shape(eez_area_vect) +   # Add again so I can have two text annotations
+    tm_polygons(col = "rank",
+                palette = "-Blues",
+                alpha = 0,
+                legend.show = FALSE) +
+    tm_text("suitable_area_label", size = 0.8, ymod = -0.7) +   # Suitable area annotation
+    tm_layout(main.title = paste(species, "Aquaculture Suitability - Ranked EEZ Regions"),
+              legend.outside = TRUE,
+              bg.color = "grey100",
+              fontfamily = "Times",
+              title.position = c('center', 'center')) +
+    tm_compass(position = (c("left", "bottom"))) +
+    tm_scale_bar(position = (c("left", "bottom")))
+}
+```
+
+```{r}
+# test function with crabs
+# **Dungeness Crab**
+# - sea surface temperature: 3-19°C
+# - depth: 0-360 meters below sea level
+
+suitable_eez_func(species = "Dungeness Crab", 
+                  min_sst =  3, 
+                  max_sst =  19,
+                  min_depth = 0,
+                  max_depth = 360)
+```
+
+
 
 
 ## Citations
