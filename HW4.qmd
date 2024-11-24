@@ -51,7 +51,7 @@ library(tidyverse)
 library(tmap)
 library(here)
 library(testthat)
-library(kableExtra)
+library(spData)
 ```
 
 Load the data:
@@ -168,6 +168,11 @@ plot(oysters_suitable)
 
 Determine the most suitable EEZ
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| output: false
+#| collapse: true
+
 # Mask suitable oysters with wc_regions to crop suitable cells to within EEZs ----
 oysters_masked <- mask(oysters_suitable, wc_regions)
 plot(oysters_masked)
@@ -178,16 +183,47 @@ plot(eez_rast)
 
 # Find area of each grid cell ----
 cell_size <- cellSize(oysters_masked, unit = "km") # This is not giving an output I would have expected
-plot(cell_size)
 
 # Find total number of cells within each EEZ ----
 eez_oyster_area <- zonal(cell_size * oysters_masked, eez_rast, fun = "sum", na.rm = TRUE) |>
-  arrange(area)
+  rename("suitable_area_km2" = "area")
 
-# Make it look preety with spData us states
+# Join eez_oyster_area to wc_regions vector by rgn_id and tidy
+eez_oyster_area_vect <- left_join(wc_regions, eez_oyster_area, by = 'rgn_id')  |>
+  select(c("rgn", "rgn_id", "area_km2", "suitable_area_km2")) |>
+  rename("total_area_km2" = "area_km2") |>
+  mutate(rank = paste0(order(order(suitable_area_km2, decreasing = TRUE)), ": ", rgn)) |>   # Rank each zone 1-5 based on suitable area
+  arrange(rank) |>
+  mutate(suitable_area_label = paste("Suitable area: \n", round(suitable_area_km2), "km2"))
 ```
 
+Create map of EEZs colored by aquaculture suitability
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
 
+# Create oyster map
+tm_shape(us_states, bbox = wc_regions) +   # basemap 
+  tm_polygons(alpha = 0.5) +
+  tm_shape(eez_oyster_area_vect) +   # Ranked EEZs
+  tm_polygons(col = "rank",
+              palette = "-Blues",
+              title = "EEZ Priority Rank \n 1 (highest) - 5 (lowest)") +
+  tm_text("rgn", fontface = "bold", ymod = 0.5) +   # EEZ region annotation                               
+  tm_shape(eez_oyster_area_vect) +   # Add again so I can have two text annotations
+    tm_polygons(col = "rank",
+              palette = "-Blues",
+              alpha = 0,
+              legend.show = FALSE) +
+  tm_text("suitable_area_label", size = 0.8, ymod = -0.7) +   # Suitable area annotation
+  tm_layout(main.title = "Oyster Aquaculture Suitability - Ranked EEZ Regions",
+            legend.outside = TRUE,
+            bg.color = "grey100",
+            fontfamily = "Times",
+            title.position = c('center', 'center')) +
+  tm_compass(position = (c("left", "bottom"))) +
+  tm_scale_bar(position = (c("left", "bottom")))
+```
 
 
 
