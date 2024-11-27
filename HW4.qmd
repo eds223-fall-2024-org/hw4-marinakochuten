@@ -100,7 +100,7 @@ wc_regions <- read_sf(here("data", "wc_regions_clean.shp"))
 
 ## Prepare and process data
 
-Next, I combine all sea surface temperature rasters into one raster stack and match the coordinate reference systems of all files. For this analysis, I use EPSG:4396. 
+Next, I combine all sea surface temperature rasters into one raster stack and match the coordinate reference systems of all files. For this analysis, I use EPSG:4326. 
 ```{r}
 #| code-fold: true
 #| code-summary: "Show the code for preparing data"
@@ -235,10 +235,8 @@ eez_oyster_area_vect <- left_join(wc_regions,
                                   by = 'rgn_id')  |>
   select(c("rgn", "rgn_id", "area_km2", "suitable_area_km2")) |>
   rename("total_area_km2" = "area_km2") |>    
-  mutate(rank = paste0(order(order(suitable_area_km2, decreasing = TRUE)), 
-                       ": ",           # Rank each zone 1-5 based on suitable area
-                       rgn)) |>   
-  arrange(rank) |>
+  arrange(desc(suitable_area_km2)) %>% 
+  mutate(rank = paste0(1:nrow(.), ": ", rgn)) |>   # Assign rank 1-5 based on total suitable area
   mutate(suitable_area_label = paste("Suitable area: \n", round(suitable_area_km2), "km2"))
 ```
 
@@ -247,7 +245,7 @@ eez_oyster_area_vect <- left_join(wc_regions,
 Now that I have the total area within each EEZ suitable for oyster aquaculture, I can show the priority EEZs with a map where the EEZ regions are colored by amount of suitable area.
 ```{r}
 #| code-fold: true
-#| code-summary: "Show the code for creating the map"
+#| code-summary: "Show the map code"
 #| fig-width: 10
 #| fig-height: 9.5
 
@@ -279,9 +277,26 @@ tm_shape(us_states, bbox = wc_regions) +   # basemap
 With a workflow for one species, I can now generalize to create a function that will prioritize EEZ regions for any species passed as an argument.
 ```{r}
 #| code-fold: true
-#| code-summary: "Show the code for writing the function"
+#| code-summary: "Show the function code"
 
 suitable_eez_func <- function(species, min_sst, max_sst, min_depth, max_depth){
+  
+  # Set custom warning messages ----
+  if((min_depth < 0) | (max_depth < 0)){
+    stop(print("min_depth and max_depth must be positive numbers"))
+  }
+  
+  if(max_sst >= 100){
+    warning(print("max_sst seems a bit high"))
+  }
+  
+  if(min_sst >= max_sst){
+    stop(print("min_sst cannot be greater than max_sst. check values"))
+  }
+  
+  if(min_depth >= max_depth){
+    stop(print("min_depth cannot be greater than max_depth. check values"))
+  }
  
   # Reclassify SST and depth into locations that are suitable for species ----
   rcl_sst <- matrix(c(-Inf, min_sst, 0,         # unsuitable
@@ -293,7 +308,7 @@ suitable_eez_func <- function(species, min_sst, max_sst, min_depth, max_depth){
   
   rcl_depth <- matrix(c(-Inf, -max_depth, 0,         # unsuitable
                         -max_depth, min_depth, 1,    # suitable
-                        0, Inf, 0),                  # unsuitable
+                        min_depth, Inf, 0),                  # unsuitable
                       ncol = 3, byrow = TRUE)
   
   depth_reclass <- classify(depth, rcl = rcl_depth)
@@ -320,8 +335,8 @@ suitable_eez_func <- function(species, min_sst, max_sst, min_depth, max_depth){
   eez_area_vect <- left_join(wc_regions, eez_area, by = 'rgn_id')  |>
     select(c("rgn", "rgn_id", "area_km2", "suitable_area_km2")) |>
     rename("total_area_km2" = "area_km2") |>
-    mutate(rank = paste0(order(order(suitable_area_km2, decreasing = TRUE)), ": ", rgn)) |> 
-    arrange(rank) |>
+    arrange(desc(suitable_area_km2)) %>% 
+    mutate(rank = paste0(1:5, ": ", rgn)) |>
     mutate(suitable_area_label = paste("Suitable area: \n", round(suitable_area_km2), "km2"))
   
   # Create map ----
@@ -347,6 +362,13 @@ suitable_eez_func <- function(species, min_sst, max_sst, min_depth, max_depth){
     tm_scale_bar(position = (c("left", "bottom")))
 }
 ```
+To use my function, `suitable_eez_func()`, provide the arguments:
+
+- `species` = a character string containing the name of the species of interest
+- `min_sst` = a numeric value of the species minimum sea surface temperature (in Celsius)
+- `max_sst` = a numeric value of the species maximum sea surface temperature (in Celsius)
+- `min_depth` = a numeric value of the species minimum depth (in meters)
+- `max_depth` = a numeric value of the species maximum depth (in meters)
 
 ## Find suitable EEZs for Dungeness Crabs
 
@@ -362,6 +384,16 @@ suitable_eez_func(species = "Dungeness Crab",
                   min_depth = 0,
                   max_depth = 360)
 ```
+
+## Interpretation of results
+
+Washington (Region ID: 5) is best suited for oysters with a total suitable area of 4483 square kilometers. For Dungeness crabs, Oregon (Region ID: 1) is best suited with a total suitable area of 18,497 square kilometers. 
+
+#### Limitations
+
+- Suitable areas are an approximation over entire cells within the rasters. If the areas suitable for a particular species cuts through a cell, that entire cell is considered in the total area.
+- Other conditions that may effect suitability for marine aquaculture other than sea surface temperature and depth are not considered in this analysis.
+- The data I used to calculate sea surface temperature is from 2008-2012. With rising sea temperatures, it is very possible that the average sea surface temperature today is different than the one used in this analysis. It would be important to consider newer sst data in further analysis. 
 
 ## Citations
 

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Marina Kochuten">
-<meta name="dcterms.date" content="2024-11-23">
+<meta name="dcterms.date" content="2024-11-26">
 
 <title>Prioritizing potential aquaculture</title>
 <style>
@@ -89,6 +89,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#create-map-of-eezs-colored-by-area-of-oyster-suitability" id="toc-create-map-of-eezs-colored-by-area-of-oyster-suitability" class="nav-link" data-scroll-target="#create-map-of-eezs-colored-by-area-of-oyster-suitability">Create map of EEZs colored by area of oyster suitability</a></li>
   <li><a href="#generalize-workflow-into-a-function" id="toc-generalize-workflow-into-a-function" class="nav-link" data-scroll-target="#generalize-workflow-into-a-function">Generalize workflow into a function</a></li>
   <li><a href="#find-suitable-eezs-for-dungeness-crabs" id="toc-find-suitable-eezs-for-dungeness-crabs" class="nav-link" data-scroll-target="#find-suitable-eezs-for-dungeness-crabs">Find suitable EEZs for Dungeness Crabs</a></li>
+  <li><a href="#interpretation-of-results" id="toc-interpretation-of-results" class="nav-link" data-scroll-target="#interpretation-of-results">Interpretation of results</a></li>
   <li><a href="#citations" id="toc-citations" class="nav-link" data-scroll-target="#citations">Citations</a></li>
   </ul>
 </nav>
@@ -114,7 +115,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">November 23, 2024</p>
+      <p class="date">November 26, 2024</p>
     </div>
   </div>
   
@@ -128,7 +129,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="project-description" class="level2">
 <h2 class="anchored" data-anchor-id="project-description">Project description</h2>
-<p>For this project, I am determining which Exclusive Economic Zones (EEZ) on the West Coast of the US are best suited to developing marine aquaculture for several species of oysters and Dungeness crabs.</p>
+<p>For this project, I determine which Exclusive Economic Zones (EEZ) on the West Coast of the US are best suited to developing marine aquaculture for several species of oysters and Dungeness crabs.</p>
 <p>Marine aquaculture has the potential to play an important role in the global food supply as a more sustainable protein option than land-based meat production (Hall et al.&nbsp;2011). Gentry et al.&nbsp;mapped the potential for marine aquaculture globally based on multiple constraints, including ship traffic, dissolved oxygen, and bottom depth. They found that global seafood demand could be met using less than 0.015% of the global ocean area (Gentry et al.&nbsp;2017).</p>
 <p>Suitable locations are determined based on range of suitable sea surface temperature (SST) and depth values for each species. Suitable growing conditions are found on <a href="https://www.sealifebase.ca/search.php">SeaLifeBase</a>. Conditions for my species of interest are:</p>
 <section id="oysters" class="level4">
@@ -211,7 +212,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="prepare-and-process-data" class="level2">
 <h2 class="anchored" data-anchor-id="prepare-and-process-data">Prepare and process data</h2>
-<p>Next, I combine all sea surface temperature rasters into one raster stack and match the coordinate reference systems of all files. For this analysis, I use EPSG:4396.</p>
+<p>Next, I combine all sea surface temperature rasters into one raster stack and match the coordinate reference systems of all files. For this analysis, I use EPSG:4326.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code for preparing data</summary>
@@ -339,11 +340,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">by =</span> <span class="st">'rgn_id'</span>)  <span class="sc">|&gt;</span></span>
 <span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">c</span>(<span class="st">"rgn"</span>, <span class="st">"rgn_id"</span>, <span class="st">"area_km2"</span>, <span class="st">"suitable_area_km2"</span>)) <span class="sc">|&gt;</span></span>
 <span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="st">"total_area_km2"</span> <span class="ot">=</span> <span class="st">"area_km2"</span>) <span class="sc">|&gt;</span>    </span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">rank =</span> <span class="fu">paste0</span>(<span class="fu">order</span>(<span class="fu">order</span>(suitable_area_km2, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)), </span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>                       <span class="st">": "</span>,           <span class="co"># Rank each zone 1-5 based on suitable area</span></span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>                       rgn)) <span class="sc">|&gt;</span>   </span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(rank) <span class="sc">|&gt;</span></span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">suitable_area_label =</span> <span class="fu">paste</span>(<span class="st">"Suitable area: </span><span class="sc">\n</span><span class="st">"</span>, <span class="fu">round</span>(suitable_area_km2), <span class="st">"km2"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(suitable_area_km2)) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">rank =</span> <span class="fu">paste0</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(.), <span class="st">": "</span>, rgn)) <span class="sc">|&gt;</span>   <span class="co"># Assign rank 1-5 based on total suitable area</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">suitable_area_label =</span> <span class="fu">paste</span>(<span class="st">"Suitable area: </span><span class="sc">\n</span><span class="st">"</span>, <span class="fu">round</span>(suitable_area_km2), <span class="st">"km2"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -352,7 +351,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Now that I have the total area within each EEZ suitable for oyster aquaculture, I can show the priority EEZs with a map where the EEZ regions are colored by amount of suitable area.</p>
 <div class="cell">
 <details class="code-fold">
-<summary>Show the code for creating the map</summary>
+<summary>Show the map code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create oyster map</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(us_states, <span class="at">bbox =</span> wc_regions) <span class="sc">+</span>   <span class="co"># basemap </span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
@@ -389,74 +388,99 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>With a workflow for one species, I can now generalize to create a function that will prioritize EEZ regions for any species passed as an argument.</p>
 <div class="cell">
 <details class="code-fold">
-<summary>Show the code for writing the function</summary>
+<summary>Show the function code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>suitable_eez_func <span class="ot">&lt;-</span> <span class="cf">function</span>(species, min_sst, max_sst, min_depth, max_depth){</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Reclassify SST and depth into locations that are suitable for species ----</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  rcl_sst <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, min_sst, <span class="dv">0</span>,         <span class="co"># unsuitable</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>                      min_sst, max_sst, <span class="dv">1</span>,      <span class="co"># suitable</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>                      max_sst, <span class="cn">Inf</span>, <span class="dv">0</span>),         <span class="co"># unsuitable</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>                    <span class="at">ncol =</span> <span class="dv">3</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  sst_reclass <span class="ot">&lt;-</span> <span class="fu">classify</span>(sst_mean, <span class="at">rcl =</span> rcl_sst)</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  rcl_depth <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="sc">-</span>max_depth, <span class="dv">0</span>,         <span class="co"># unsuitable</span></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>                        <span class="sc">-</span>max_depth, min_depth, <span class="dv">1</span>,    <span class="co"># suitable</span></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>                        <span class="dv">0</span>, <span class="cn">Inf</span>, <span class="dv">0</span>),                  <span class="co"># unsuitable</span></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>                      <span class="at">ncol =</span> <span class="dv">3</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Set custom warning messages ----</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>((min_depth <span class="sc">&lt;</span> <span class="dv">0</span>) <span class="sc">|</span> (max_depth <span class="sc">&lt;</span> <span class="dv">0</span>)){</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="fu">print</span>(<span class="st">"min_depth and max_depth must be positive numbers"</span>))</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(max_sst <span class="sc">&gt;=</span> <span class="dv">100</span>){</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">warning</span>(<span class="fu">print</span>(<span class="st">"max_sst seems a bit high"</span>))</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(min_sst <span class="sc">&gt;=</span> max_sst){</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="fu">print</span>(<span class="st">"min_sst cannot be greater than max_sst. check values"</span>))</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  depth_reclass <span class="ot">&lt;-</span> <span class="fu">classify</span>(depth, <span class="at">rcl =</span> rcl_depth)</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Find locations that satisfy both SST and depth conditions for species ----</span></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  suitable <span class="ot">&lt;-</span> <span class="fu">lapp</span>(<span class="fu">c</span>(sst_reclass, depth_reclass), <span class="at">fun =</span> <span class="cf">function</span>(sst, depth) sst <span class="sc">*</span> depth) </span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>  suitable[suitable <span class="sc">==</span> <span class="dv">0</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Mask suitable with wc_regions to crop suitable cells to within EEZs ----</span></span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>  masked <span class="ot">&lt;-</span> <span class="fu">mask</span>(suitable, wc_regions)</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(min_depth <span class="sc">&gt;=</span> max_depth){</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="fu">print</span>(<span class="st">"min_depth cannot be greater than max_depth. check values"</span>))</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Reclassify SST and depth into locations that are suitable for species ----</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>  rcl_sst <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, min_sst, <span class="dv">0</span>,         <span class="co"># unsuitable</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>                      min_sst, max_sst, <span class="dv">1</span>,      <span class="co"># suitable</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>                      max_sst, <span class="cn">Inf</span>, <span class="dv">0</span>),         <span class="co"># unsuitable</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>                    <span class="at">ncol =</span> <span class="dv">3</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Rasterize wc_regions for zonal operations ----</span></span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>  eez_rast <span class="ot">&lt;-</span> <span class="fu">rasterize</span>(wc_regions, masked, <span class="at">field =</span> <span class="st">"rgn_id"</span>)</span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Find area of each grid cell ----</span></span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>  cell_size <span class="ot">&lt;-</span> <span class="fu">cellSize</span>(masked, <span class="at">unit =</span> <span class="st">"km"</span>)</span>
-<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Find total number of cells within each EEZ ----</span></span>
-<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>  eez_area <span class="ot">&lt;-</span> <span class="fu">zonal</span>(cell_size <span class="sc">*</span> masked, eez_rast, <span class="at">fun =</span> <span class="st">"sum"</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
-<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename</span>(<span class="st">"suitable_area_km2"</span> <span class="ot">=</span> <span class="st">"area"</span>)</span>
-<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Join eez_area to wc_regions vector by rgn_id and tidy</span></span>
-<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>  eez_area_vect <span class="ot">&lt;-</span> <span class="fu">left_join</span>(wc_regions, eez_area, <span class="at">by =</span> <span class="st">'rgn_id'</span>)  <span class="sc">|&gt;</span></span>
-<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(<span class="fu">c</span>(<span class="st">"rgn"</span>, <span class="st">"rgn_id"</span>, <span class="st">"area_km2"</span>, <span class="st">"suitable_area_km2"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename</span>(<span class="st">"total_area_km2"</span> <span class="ot">=</span> <span class="st">"area_km2"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">rank =</span> <span class="fu">paste0</span>(<span class="fu">order</span>(<span class="fu">order</span>(suitable_area_km2, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)), <span class="st">": "</span>, rgn)) <span class="sc">|&gt;</span> </span>
-<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(rank) <span class="sc">|&gt;</span></span>
-<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">suitable_area_label =</span> <span class="fu">paste</span>(<span class="st">"Suitable area: </span><span class="sc">\n</span><span class="st">"</span>, <span class="fu">round</span>(suitable_area_km2), <span class="st">"km2"</span>))</span>
-<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Create map ----</span></span>
-<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(us_states, <span class="at">bbox =</span> wc_regions) <span class="sc">+</span>   <span class="co"># basemap </span></span>
-<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_polygons</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_shape</span>(eez_area_vect) <span class="sc">+</span>   <span class="co"># Ranked EEZs</span></span>
-<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_polygons</span>(<span class="at">col =</span> <span class="st">"rank"</span>,</span>
-<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>                <span class="at">palette =</span> <span class="st">"-Blues"</span>,</span>
-<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>                <span class="at">title =</span> <span class="st">"EEZ Priority Rank </span><span class="sc">\n</span><span class="st"> 1 (highest) - 5 (lowest)"</span>) <span class="sc">+</span></span>
-<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_text</span>(<span class="st">"rgn"</span>, <span class="at">fontface =</span> <span class="st">"bold"</span>, <span class="at">ymod =</span> <span class="fl">0.5</span>) <span class="sc">+</span>   <span class="co"># EEZ region annotation                         </span></span>
-<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_shape</span>(eez_area_vect) <span class="sc">+</span>   <span class="co"># Add again so I can have two text annotations</span></span>
-<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_polygons</span>(<span class="at">col =</span> <span class="st">"rank"</span>,</span>
-<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>                <span class="at">palette =</span> <span class="st">"-Blues"</span>,</span>
-<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>                <span class="at">alpha =</span> <span class="dv">0</span>,</span>
-<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>                <span class="at">legend.show =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_text</span>(<span class="st">"suitable_area_label"</span>, <span class="at">size =</span> <span class="fl">0.8</span>, <span class="at">ymod =</span> <span class="sc">-</span><span class="fl">0.7</span>) <span class="sc">+</span>   <span class="co"># Suitable area annotation</span></span>
-<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_layout</span>(<span class="at">main.title =</span> <span class="fu">paste</span>(species, <span class="st">"Aquaculture Suitability - Ranked EEZ Regions"</span>),</span>
-<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>              <span class="at">legend.outside =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>              <span class="at">bg.color =</span> <span class="st">"grey100"</span>,</span>
-<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a>              <span class="at">fontfamily =</span> <span class="st">"Times"</span>,</span>
-<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>              <span class="at">title.position =</span> <span class="fu">c</span>(<span class="st">'center'</span>, <span class="st">'center'</span>)) <span class="sc">+</span></span>
-<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_compass</span>(<span class="at">position =</span> (<span class="fu">c</span>(<span class="st">"left"</span>, <span class="st">"bottom"</span>))) <span class="sc">+</span></span>
-<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_scale_bar</span>(<span class="at">position =</span> (<span class="fu">c</span>(<span class="st">"left"</span>, <span class="st">"bottom"</span>)))</span>
-<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>  sst_reclass <span class="ot">&lt;-</span> <span class="fu">classify</span>(sst_mean, <span class="at">rcl =</span> rcl_sst)</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>  rcl_depth <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="sc">-</span>max_depth, <span class="dv">0</span>,         <span class="co"># unsuitable</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>                        <span class="sc">-</span>max_depth, min_depth, <span class="dv">1</span>,    <span class="co"># suitable</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>                        <span class="dv">0</span>, <span class="cn">Inf</span>, <span class="dv">0</span>),                  <span class="co"># unsuitable</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>                      <span class="at">ncol =</span> <span class="dv">3</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>  depth_reclass <span class="ot">&lt;-</span> <span class="fu">classify</span>(depth, <span class="at">rcl =</span> rcl_depth)</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Find locations that satisfy both SST and depth conditions for species ----</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>  suitable <span class="ot">&lt;-</span> <span class="fu">lapp</span>(<span class="fu">c</span>(sst_reclass, depth_reclass), <span class="at">fun =</span> <span class="cf">function</span>(sst, depth) sst <span class="sc">*</span> depth) </span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>  suitable[suitable <span class="sc">==</span> <span class="dv">0</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Mask suitable with wc_regions to crop suitable cells to within EEZs ----</span></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>  masked <span class="ot">&lt;-</span> <span class="fu">mask</span>(suitable, wc_regions)</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Rasterize wc_regions for zonal operations ----</span></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>  eez_rast <span class="ot">&lt;-</span> <span class="fu">rasterize</span>(wc_regions, masked, <span class="at">field =</span> <span class="st">"rgn_id"</span>)</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Find area of each grid cell ----</span></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>  cell_size <span class="ot">&lt;-</span> <span class="fu">cellSize</span>(masked, <span class="at">unit =</span> <span class="st">"km"</span>)</span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Find total number of cells within each EEZ ----</span></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>  eez_area <span class="ot">&lt;-</span> <span class="fu">zonal</span>(cell_size <span class="sc">*</span> masked, eez_rast, <span class="at">fun =</span> <span class="st">"sum"</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename</span>(<span class="st">"suitable_area_km2"</span> <span class="ot">=</span> <span class="st">"area"</span>)</span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Join eez_area to wc_regions vector by rgn_id and tidy</span></span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>  eez_area_vect <span class="ot">&lt;-</span> <span class="fu">left_join</span>(wc_regions, eez_area, <span class="at">by =</span> <span class="st">'rgn_id'</span>)  <span class="sc">|&gt;</span></span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(<span class="fu">c</span>(<span class="st">"rgn"</span>, <span class="st">"rgn_id"</span>, <span class="st">"area_km2"</span>, <span class="st">"suitable_area_km2"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename</span>(<span class="st">"total_area_km2"</span> <span class="ot">=</span> <span class="st">"area_km2"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(<span class="fu">desc</span>(suitable_area_km2)) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">rank =</span> <span class="fu">paste0</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="st">": "</span>, rgn)) <span class="sc">|&gt;</span></span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">suitable_area_label =</span> <span class="fu">paste</span>(<span class="st">"Suitable area: </span><span class="sc">\n</span><span class="st">"</span>, <span class="fu">round</span>(suitable_area_km2), <span class="st">"km2"</span>))</span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Create map ----</span></span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(us_states, <span class="at">bbox =</span> wc_regions) <span class="sc">+</span>   <span class="co"># basemap </span></span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_polygons</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_shape</span>(eez_area_vect) <span class="sc">+</span>   <span class="co"># Ranked EEZs</span></span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_polygons</span>(<span class="at">col =</span> <span class="st">"rank"</span>,</span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a>                <span class="at">palette =</span> <span class="st">"-Blues"</span>,</span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>                <span class="at">title =</span> <span class="st">"EEZ Priority Rank </span><span class="sc">\n</span><span class="st"> 1 (highest) - 5 (lowest)"</span>) <span class="sc">+</span></span>
+<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_text</span>(<span class="st">"rgn"</span>, <span class="at">fontface =</span> <span class="st">"bold"</span>, <span class="at">ymod =</span> <span class="fl">0.5</span>) <span class="sc">+</span>   <span class="co"># EEZ region annotation                         </span></span>
+<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_shape</span>(eez_area_vect) <span class="sc">+</span>   <span class="co"># Add again so I can have two text annotations</span></span>
+<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_polygons</span>(<span class="at">col =</span> <span class="st">"rank"</span>,</span>
+<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a>                <span class="at">palette =</span> <span class="st">"-Blues"</span>,</span>
+<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a>                <span class="at">alpha =</span> <span class="dv">0</span>,</span>
+<span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a>                <span class="at">legend.show =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb8-74"><a href="#cb8-74" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_text</span>(<span class="st">"suitable_area_label"</span>, <span class="at">size =</span> <span class="fl">0.8</span>, <span class="at">ymod =</span> <span class="sc">-</span><span class="fl">0.7</span>) <span class="sc">+</span>   <span class="co"># Suitable area annotation</span></span>
+<span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_layout</span>(<span class="at">main.title =</span> <span class="fu">paste</span>(species, <span class="st">"Aquaculture Suitability - Ranked EEZ Regions"</span>),</span>
+<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a>              <span class="at">legend.outside =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a>              <span class="at">bg.color =</span> <span class="st">"grey100"</span>,</span>
+<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a>              <span class="at">fontfamily =</span> <span class="st">"Times"</span>,</span>
+<span id="cb8-79"><a href="#cb8-79" aria-hidden="true" tabindex="-1"></a>              <span class="at">title.position =</span> <span class="fu">c</span>(<span class="st">'center'</span>, <span class="st">'center'</span>)) <span class="sc">+</span></span>
+<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_compass</span>(<span class="at">position =</span> (<span class="fu">c</span>(<span class="st">"left"</span>, <span class="st">"bottom"</span>))) <span class="sc">+</span></span>
+<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_scale_bar</span>(<span class="at">position =</span> (<span class="fu">c</span>(<span class="st">"left"</span>, <span class="st">"bottom"</span>)))</span>
+<span id="cb8-82"><a href="#cb8-82" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
+<p>To use my function, <code>suitable_eez_func()</code>, provide the arguments:</p>
+<ul>
+<li><code>species</code> = a character string containing the name of the species of interest</li>
+<li><code>min_sst</code> = a numeric value of the species minimum sea surface temperature (in Celsius)</li>
+<li><code>max_sst</code> = a numeric value of the species maximum sea surface temperature (in Celsius)</li>
+<li><code>min_depth</code> = a numeric value of the species minimum depth (in meters)</li>
+<li><code>max_depth</code> = a numeric value of the species maximum depth (in meters)</li>
+</ul>
 </section>
 <section id="find-suitable-eezs-for-dungeness-crabs" class="level2">
 <h2 class="anchored" data-anchor-id="find-suitable-eezs-for-dungeness-crabs">Find suitable EEZs for Dungeness Crabs</h2>
@@ -476,6 +500,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
+</section>
+<section id="interpretation-of-results" class="level2">
+<h2 class="anchored" data-anchor-id="interpretation-of-results">Interpretation of results</h2>
+<p>Washington (Region ID: 5) is best suited for oysters with a total suitable area of 4483 square kilometers. For Dungeness crabs, Oregon (Region ID: 1) is best suited with a total suitable area of 18,497 square kilometers.</p>
+<section id="limitations" class="level4">
+<h4 class="anchored" data-anchor-id="limitations">Limitations</h4>
+<ul>
+<li>Suitable areas are an approximation over entire cells within the rasters. If the areas suitable for a particular species cuts through a cell, that entire cell is considered in the total area.</li>
+<li>Other conditions that may effect suitability for marine aquaculture other than sea surface temperature and depth are not considered in this analysis.</li>
+<li>The data I used to calculate sea surface temperature is from 2008-2012. With rising sea temperatures, it is very possible that the average sea surface temperature today is different than the one used in this analysis. It would be important to consider newer sst data in further analysis.</li>
+</ul>
+</section>
 </section>
 <section id="citations" class="level2">
 <h2 class="anchored" data-anchor-id="citations">Citations</h2>
