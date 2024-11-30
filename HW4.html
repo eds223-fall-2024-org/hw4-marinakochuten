@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Marina Kochuten">
-<meta name="dcterms.date" content="2024-11-26">
+<meta name="dcterms.date" content="2024-11-29">
 
 <title>Prioritizing potential aquaculture</title>
 <style>
@@ -115,7 +115,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">November 26, 2024</p>
+      <p class="date">November 29, 2024</p>
     </div>
   </div>
   
@@ -358,7 +358,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(eez_oyster_area_vect) <span class="sc">+</span>   <span class="co"># Ranked EEZs</span></span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">col =</span> <span class="st">"rank"</span>,</span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">palette =</span> <span class="st">"-Blues"</span>,</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">title =</span> <span class="st">"EEZ Priority Rank </span><span class="sc">\n</span><span class="st"> 1 (highest) - 5 (lowest)"</span>) <span class="sc">+</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">title =</span> <span class="st">"EEZ Aquaculture Priority Rank </span><span class="sc">\n</span><span class="st"> 1 (highest) - 5 (lowest)"</span>) <span class="sc">+</span></span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_text</span>(<span class="st">"rgn"</span>, <span class="at">fontface =</span> <span class="st">"bold"</span>, <span class="at">ymod =</span> <span class="fl">0.5</span>) <span class="sc">+</span>   <span class="co"># EEZ region annotation                               </span></span>
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(eez_oyster_area_vect) <span class="sc">+</span>   <span class="co"># Add again so I can have two text annotations</span></span>
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_polygons</span>(<span class="at">col =</span> <span class="st">"rank"</span>,</span>
@@ -366,18 +366,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>              <span class="at">alpha =</span> <span class="dv">0</span>,</span>
 <span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>              <span class="at">legend.show =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
 <span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_text</span>(<span class="st">"suitable_area_label"</span>, <span class="at">size =</span> <span class="fl">0.8</span>, <span class="at">ymod =</span> <span class="sc">-</span><span class="fl">0.9</span>) <span class="sc">+</span>   <span class="co"># Suitable area annotation</span></span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">main.title =</span> <span class="st">"Oyster Aquaculture Suitability - Ranked EEZ Regions"</span>,</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>            <span class="at">legend.outside =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>            <span class="at">bg.color =</span> <span class="st">"grey100"</span>,</span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>            <span class="at">fontfamily =</span> <span class="st">"Times"</span>,</span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>            <span class="at">title.position =</span> <span class="fu">c</span>(<span class="st">'center'</span>, <span class="st">'center'</span>)) <span class="sc">+</span></span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_compass</span>(<span class="at">position =</span> (<span class="fu">c</span>(<span class="st">"left"</span>, <span class="st">"bottom"</span>))) <span class="sc">+</span></span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_scale_bar</span>(<span class="at">position =</span> (<span class="fu">c</span>(<span class="st">"left"</span>, <span class="st">"bottom"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">main.title =</span> <span class="st">"Area of Oyster Habitat </span><span class="sc">\n</span><span class="st"> per West Coast Exclusive Economic Zones (EEZ)"</span>,</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>            <span class="at">main.title.position =</span> <span class="fu">c</span>(<span class="st">"center"</span>, <span class="st">"top"</span>),</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>            <span class="at">legend.outside =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>            <span class="at">bg.color =</span> <span class="st">"grey100"</span>,</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>            <span class="at">fontfamily =</span> <span class="st">"Times"</span>,</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>            <span class="at">title.position =</span> <span class="fu">c</span>(<span class="st">'center'</span>, <span class="st">'center'</span>)) <span class="sc">+</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_compass</span>(<span class="at">position =</span> (<span class="fu">c</span>(<span class="st">"left"</span>, <span class="st">"bottom"</span>))) <span class="sc">+</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_scale_bar</span>(<span class="at">position =</span> (<span class="fu">c</span>(<span class="st">"left"</span>, <span class="st">"bottom"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="HW4_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="960"></p>
+<p><img src="HW4_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="1056"></p>
 </figure>
 </div>
 </div>
@@ -418,7 +419,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>  rcl_depth <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="sc">-</span>max_depth, <span class="dv">0</span>,         <span class="co"># unsuitable</span></span>
 <span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>                        <span class="sc">-</span>max_depth, min_depth, <span class="dv">1</span>,    <span class="co"># suitable</span></span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>                        <span class="dv">0</span>, <span class="cn">Inf</span>, <span class="dv">0</span>),                  <span class="co"># unsuitable</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>                        min_depth, <span class="cn">Inf</span>, <span class="dv">0</span>),                  <span class="co"># unsuitable</span></span>
 <span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>                      <span class="at">ncol =</span> <span class="dv">3</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>  depth_reclass <span class="ot">&lt;-</span> <span class="fu">classify</span>(depth, <span class="at">rcl =</span> rcl_depth)</span>
@@ -455,7 +456,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_shape</span>(eez_area_vect) <span class="sc">+</span>   <span class="co"># Ranked EEZs</span></span>
 <span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_polygons</span>(<span class="at">col =</span> <span class="st">"rank"</span>,</span>
 <span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a>                <span class="at">palette =</span> <span class="st">"-Blues"</span>,</span>
-<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>                <span class="at">title =</span> <span class="st">"EEZ Priority Rank </span><span class="sc">\n</span><span class="st"> 1 (highest) - 5 (lowest)"</span>) <span class="sc">+</span></span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>                <span class="at">title =</span> <span class="st">"EEZ Aquaculture Priority Rank </span><span class="sc">\n</span><span class="st"> 1 (highest) - 5 (lowest)"</span>) <span class="sc">+</span></span>
 <span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_text</span>(<span class="st">"rgn"</span>, <span class="at">fontface =</span> <span class="st">"bold"</span>, <span class="at">ymod =</span> <span class="fl">0.5</span>) <span class="sc">+</span>   <span class="co"># EEZ region annotation                         </span></span>
 <span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_shape</span>(eez_area_vect) <span class="sc">+</span>   <span class="co"># Add again so I can have two text annotations</span></span>
 <span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_polygons</span>(<span class="at">col =</span> <span class="st">"rank"</span>,</span>
@@ -463,14 +464,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a>                <span class="at">alpha =</span> <span class="dv">0</span>,</span>
 <span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a>                <span class="at">legend.show =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
 <span id="cb8-74"><a href="#cb8-74" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_text</span>(<span class="st">"suitable_area_label"</span>, <span class="at">size =</span> <span class="fl">0.8</span>, <span class="at">ymod =</span> <span class="sc">-</span><span class="fl">0.7</span>) <span class="sc">+</span>   <span class="co"># Suitable area annotation</span></span>
-<span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_layout</span>(<span class="at">main.title =</span> <span class="fu">paste</span>(species, <span class="st">"Aquaculture Suitability - Ranked EEZ Regions"</span>),</span>
-<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a>              <span class="at">legend.outside =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a>              <span class="at">bg.color =</span> <span class="st">"grey100"</span>,</span>
-<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a>              <span class="at">fontfamily =</span> <span class="st">"Times"</span>,</span>
-<span id="cb8-79"><a href="#cb8-79" aria-hidden="true" tabindex="-1"></a>              <span class="at">title.position =</span> <span class="fu">c</span>(<span class="st">'center'</span>, <span class="st">'center'</span>)) <span class="sc">+</span></span>
-<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_compass</span>(<span class="at">position =</span> (<span class="fu">c</span>(<span class="st">"left"</span>, <span class="st">"bottom"</span>))) <span class="sc">+</span></span>
-<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_scale_bar</span>(<span class="at">position =</span> (<span class="fu">c</span>(<span class="st">"left"</span>, <span class="st">"bottom"</span>)))</span>
-<span id="cb8-82"><a href="#cb8-82" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_layout</span>(<span class="at">main.title =</span> <span class="fu">paste</span>(<span class="st">"Area of"</span>, species, <span class="st">"Habitat </span><span class="sc">\n</span><span class="st"> per West Coast Exclusive Economic Zones (EEZ)"</span>),</span>
+<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a>              <span class="at">main.title.position =</span> <span class="fu">c</span>(<span class="st">"center"</span>, <span class="st">"top"</span>),</span>
+<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a>              <span class="at">legend.outside =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a>              <span class="at">bg.color =</span> <span class="st">"grey100"</span>,</span>
+<span id="cb8-79"><a href="#cb8-79" aria-hidden="true" tabindex="-1"></a>              <span class="at">fontfamily =</span> <span class="st">"Times"</span>,</span>
+<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a>              <span class="at">title.position =</span> <span class="fu">c</span>(<span class="st">'center'</span>, <span class="st">'center'</span>)) <span class="sc">+</span></span>
+<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_compass</span>(<span class="at">position =</span> (<span class="fu">c</span>(<span class="st">"left"</span>, <span class="st">"bottom"</span>))) <span class="sc">+</span></span>
+<span id="cb8-82"><a href="#cb8-82" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_scale_bar</span>(<span class="at">position =</span> (<span class="fu">c</span>(<span class="st">"left"</span>, <span class="st">"bottom"</span>)))</span>
+<span id="cb8-83"><a href="#cb8-83" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>To use my function, <code>suitable_eez_func()</code>, provide the arguments:</p>
@@ -495,7 +497,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="HW4_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="960"></p>
+<p><img src="HW4_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="1056"></p>
 </figure>
 </div>
 </div>
@@ -508,8 +510,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h4 class="anchored" data-anchor-id="limitations">Limitations</h4>
 <ul>
 <li>Suitable areas are an approximation over entire cells within the rasters. If the areas suitable for a particular species cuts through a cell, that entire cell is considered in the total area.</li>
-<li>Other conditions that may effect suitability for marine aquaculture other than sea surface temperature and depth are not considered in this analysis.</li>
-<li>The data I used to calculate sea surface temperature is from 2008-2012. With rising sea temperatures, it is very possible that the average sea surface temperature today is different than the one used in this analysis. It would be important to consider newer sst data in further analysis.</li>
+<li>Other conditions that may effect suitability for marine aquaculture other than sea surface temperature and depth are not considered in calculating total area suitable for each species.</li>
+<li>The data I used to calculate sea surface temperature is from 2008-2012. With rising sea temperatures, it is very possible that the average sea surface temperature today is different than the one used in this analysis. It would be important to consider more recent SST data in further consideration of this analysis.</li>
 </ul>
 </section>
 </section>

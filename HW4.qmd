@@ -246,8 +246,8 @@ Now that I have the total area within each EEZ suitable for oyster aquaculture, 
 ```{r}
 #| code-fold: true
 #| code-summary: "Show the map code"
-#| fig-width: 10
-#| fig-height: 9.5
+#| fig-width: 11
+#| fig-height: 10.5
 
 # Create oyster map
 tm_shape(us_states, bbox = wc_regions) +   # basemap 
@@ -255,7 +255,7 @@ tm_shape(us_states, bbox = wc_regions) +   # basemap
   tm_shape(eez_oyster_area_vect) +   # Ranked EEZs
   tm_polygons(col = "rank",
               palette = "-Blues",
-              title = "EEZ Priority Rank \n 1 (highest) - 5 (lowest)") +
+              title = "EEZ Aquaculture Priority Rank \n 1 (highest) - 5 (lowest)") +
   tm_text("rgn", fontface = "bold", ymod = 0.5) +   # EEZ region annotation                               
   tm_shape(eez_oyster_area_vect) +   # Add again so I can have two text annotations
     tm_polygons(col = "rank",
@@ -263,7 +263,8 @@ tm_shape(us_states, bbox = wc_regions) +   # basemap
               alpha = 0,
               legend.show = FALSE) +
   tm_text("suitable_area_label", size = 0.8, ymod = -0.9) +   # Suitable area annotation
-  tm_layout(main.title = "Oyster Aquaculture Suitability - Ranked EEZ Regions",
+  tm_layout(main.title = "Area of Oyster Habitat \n per West Coast Exclusive Economic Zones (EEZ)",
+            main.title.position = c("center", "top"),
             legend.outside = TRUE,
             bg.color = "grey100",
             fontfamily = "Times",
@@ -345,7 +346,7 @@ suitable_eez_func <- function(species, min_sst, max_sst, min_depth, max_depth){
     tm_shape(eez_area_vect) +   # Ranked EEZs
     tm_polygons(col = "rank",
                 palette = "-Blues",
-                title = "EEZ Priority Rank \n 1 (highest) - 5 (lowest)") +
+                title = "EEZ Aquaculture Priority Rank \n 1 (highest) - 5 (lowest)") +
     tm_text("rgn", fontface = "bold", ymod = 0.5) +   # EEZ region annotation                         
     tm_shape(eez_area_vect) +   # Add again so I can have two text annotations
     tm_polygons(col = "rank",
@@ -353,7 +354,8 @@ suitable_eez_func <- function(species, min_sst, max_sst, min_depth, max_depth){
                 alpha = 0,
                 legend.show = FALSE) +
     tm_text("suitable_area_label", size = 0.8, ymod = -0.7) +   # Suitable area annotation
-    tm_layout(main.title = paste(species, "Aquaculture Suitability - Ranked EEZ Regions"),
+    tm_layout(main.title = paste("Area of", species, "Habitat \n per West Coast Exclusive Economic Zones (EEZ)"),
+              main.title.position = c("center", "top"),
               legend.outside = TRUE,
               bg.color = "grey100",
               fontfamily = "Times",
@@ -374,8 +376,8 @@ To use my function, `suitable_eez_func()`, provide the arguments:
 
 Using my function, I find EEZs to prioritize for aquaculture of Dungeness crabs:
 ```{r}
-#| fig-width: 10
-#| fig-height: 9.5
+#| fig-width: 11
+#| fig-height: 10.5
 
 # Prioritize EEZs for growing Dungeness crabs ----
 suitable_eez_func(species = "Dungeness Crab", 
@@ -392,8 +394,8 @@ Washington (Region ID: 5) is best suited for oysters with a total suitable area 
 #### Limitations
 
 - Suitable areas are an approximation over entire cells within the rasters. If the areas suitable for a particular species cuts through a cell, that entire cell is considered in the total area.
-- Other conditions that may effect suitability for marine aquaculture other than sea surface temperature and depth are not considered in this analysis.
-- The data I used to calculate sea surface temperature is from 2008-2012. With rising sea temperatures, it is very possible that the average sea surface temperature today is different than the one used in this analysis. It would be important to consider newer sst data in further analysis. 
+- Other conditions that may effect suitability for marine aquaculture other than sea surface temperature and depth are not considered in calculating total area suitable for each species.
+- The data I used to calculate sea surface temperature is from 2008-2012. With rising sea temperatures, it is very possible that the average sea surface temperature today is different than the one used in this analysis. It would be important to consider more recent SST data in further consideration of this analysis. 
 
 ## Citations
 
